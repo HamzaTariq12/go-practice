@@ -1,9 +1,13 @@
 package types
 
 import (
+	"errors"
 	"fmt"
 	"time"
 )
+
+var ErrNotFound = errors.New("file not found")
+var ErrNotADirectory = errors.New("not a directory")
 
 // Note Receiver funcions should be in same struct package
 type FileNode struct {
@@ -102,4 +106,26 @@ func (f *FileNode) SizeInBytes() int64 {
 // interface type without caring where or how the data is stored.
 func (f *FileNode) Stat(name string) (*FileNode, bool) {
 	return f.FindDeep(name)
+}
+
+// Stage 5
+func (f *FileNode) StatErr(name string) (*FileNode, error) {
+	if !f.IsDir {
+		err := &PathError{
+			Op:   "when opening",
+			Path: name,
+			Err:  ErrNotADirectory,
+		}
+		return nil, err
+	}
+	val, ok := f.FindDeep(name)
+	if !ok {
+		err := &PathError{
+			Op:   "when finding",
+			Path: name,
+			Err:  ErrNotFound,
+		}
+		return nil, err
+	}
+	return val, nil
 }

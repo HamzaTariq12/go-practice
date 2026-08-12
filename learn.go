@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	interfaces "mywebdav/interface"
 	"mywebdav/types"
@@ -172,6 +173,21 @@ func main() {
 	utils.DescribeIfPossible(&rootFolderBonus)
 	utils.DescribeIfPossible(logs5)
 	utils.DescribeIfPossible("testing")
+	//////////// END ////////////
+
+	// 5: Error Handling
+	//////////// START ////////////
+	// Q1
+	utils.OpenAndCount(&dragonPicture)
+	// Q2+Q3
+	val, err5 := rootFolderBonus.StatErr("3video.mp4")
+	if errors.Is(err5, types.ErrNotADirectory) {
+		fmt.Println("This is not a directory.")
+	} else if errors.Is(err5, types.ErrNotFound) {
+		fmt.Println("File not found.")
+	} else if err5 == nil {
+		fmt.Println("File found", val)
+	}
 	//////////// END ////////////
 
 	fmt.Println("End Main!")
