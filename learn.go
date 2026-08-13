@@ -14,6 +14,7 @@ func main() {
 
 	// 1: Fundamentals
 	//////////// START ////////////
+	println("STAGE-1")
 	value, err1 := utils.GetFileMimeType("a.txt")
 	if err1 != nil {
 		fmt.Printf("Error: %v", err1)
@@ -24,6 +25,7 @@ func main() {
 
 	// 2: Control Flow & Data Structures
 	//////////// START ////////////
+	println("STAGE-2")
 	// Slices
 	var directory []string
 	var result string
@@ -102,6 +104,7 @@ func main() {
 
 	// 3: Pointers & Methods
 	//////////// START ////////////
+	println("STAGE-3")
 	// Q1
 	utils.DoubleSize(&dragonPicture)
 	fmt.Println(dragonPicture.Size)
@@ -159,6 +162,7 @@ func main() {
 
 	// 4: Interfaces
 	//////////// START ////////////
+	println("STAGE-4")
 	// Q1
 	interfaces.PrintSize(&rootFolderBonus)
 	// Q2
@@ -177,6 +181,7 @@ func main() {
 
 	// 5: Error Handling
 	//////////// START ////////////
+	println("STAGE-5")
 	// Q1
 	utils.OpenAndCount(&dragonPicture)
 	// Q2+Q3
@@ -188,6 +193,23 @@ func main() {
 	} else if err5 == nil {
 		fmt.Println("File found", val)
 	}
+	// Q4
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("recovered from panic:", r)
+		}
+	}()
+	var emptyFile *types.FileNode
+	val5_4, err5_4 := types.SafeStat(emptyFile, "3video.mp4")
+	if err5_4 != nil {
+		fmt.Println("failed:", err5_4) // will print: "failed: recovered from panic: triggering a nil pointer dereference"
+	}
+	println("found safely", val5_4)
+	//////////// END ////////////
+
+	// 6: Concurrency
+	//////////// START ////////////
+	println("STAGE-6")
 	//////////// END ////////////
 
 	fmt.Println("End Main!")

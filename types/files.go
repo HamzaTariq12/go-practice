@@ -129,3 +129,23 @@ func (f *FileNode) StatErr(name string) (*FileNode, error) {
 	}
 	return val, nil
 }
+
+func SafeStat(f *FileNode, name string) (node *FileNode, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("recovered from panic: %v", r) // turn panic into a normal error
+		}
+	}()
+
+	if f == nil {
+		panic("triggering a nil pointer dereference")
+	}
+	if !f.IsDir {
+		return nil, ErrNotADirectory
+	}
+	val, ok := f.FindDeep(name)
+	if !ok {
+		return nil, ErrNotFound
+	}
+	return val, nil
+}
