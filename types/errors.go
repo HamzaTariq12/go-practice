@@ -2,6 +2,14 @@ package types
 
 import "fmt"
 
+// A type can also satisfy 2 interfaces
+// Here PathError satisfy both error and Unwrapper interface
+// type error interface {
+//     Error() string
+// }
+// type Unwrapper interface {
+//     Unwrap() error
+// }
 type PathError struct {
 	Op   string // what operation failed, e.g. "open"
 	Path string // which path
