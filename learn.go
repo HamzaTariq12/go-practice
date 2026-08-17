@@ -194,22 +194,52 @@ func main() {
 		fmt.Println("File found", val)
 	}
 	// Q4
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("recovered from panic:", r)
-		}
-	}()
 	var emptyFile *types.FileNode
 	val5_4, err5_4 := types.SafeStat(emptyFile, "3video.mp4")
 	if err5_4 != nil {
 		fmt.Println("failed:", err5_4) // will print: "failed: recovered from panic: triggering a nil pointer dereference"
+	} else {
+		println("found safely", val5_4)
 	}
-	println("found safely", val5_4)
 	//////////// END ////////////
 
 	// 6: Concurrency
 	//////////// START ////////////
 	println("STAGE-6")
+	// Example
+	ch1 := make(chan int)
+	var msg int
+	go func() {
+		time.Sleep(1000 * time.Millisecond)
+		ch1 <- 5
+		fmt.Println("check-4")
+	}()
+	fmt.Println("check-1")
+	time.Sleep(time.Second)
+	msg = <-ch1
+	fmt.Println("check-2", msg)
+	fmt.Println("check-3")
+	ch2 := make(chan int)
+	select {
+	case msg = <-ch2:
+		fmt.Println("from 2nd channel", msg)
+	case <-time.After(1000 * time.Millisecond): //check-4 gets printed because of time here (go routine gets extra time to execute)
+		fmt.Println("waiting timeout")
+	}
+	// 2 Important concepts for concurrency (DEADLOCKs / RACE CONDITION)
+	// there are 2 types of channels (buffered/unbuffered) if we define the channel size when
+	// making them then they are buffered channels other wise unbuffered channel.
+	// Note: Unbuffered channel has no storage so they require both sender/receiver at same time
+	// if you define one of either of them then you will get DEADLOCK error
+	// for buffered channels if the storage limit hits then you must define receiver before
+	// adding more to it else you will get DEADLOCK
+	// RACE CONDITION occurs when you try to change the same variable at same time. Like multiple
+	// go routines updating the same variable at same time. To solve this problem use
+	// sync.Mutex (Lock and Unlock) and if we want a go routine to wait for sometime before moving
+	// to new go routine we can use sync.WaitGroup (wg.Add/wg.Done/wg.Wait)
+	// More detail written in go_concurrency_notes file.
+
+	// Q1
 	//////////// END ////////////
 
 	fmt.Println("End Main!")
