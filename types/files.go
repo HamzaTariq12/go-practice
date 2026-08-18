@@ -3,6 +3,7 @@ package types
 import (
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -148,4 +149,41 @@ func SafeStat(f *FileNode, name string) (node *FileNode, err error) {
 		return nil, ErrNotFound
 	}
 	return val, nil
+}
+
+// Stage 6
+type FileNode6 struct {
+	Name     string
+	IsDir    bool
+	Size     int64
+	Modified time.Time
+	Data     []byte                // file contents (nil if it's a directory)
+	Children map[string]*FileNode6 // only used if IsDir == true
+
+	mu sync.Mutex
+}
+
+func (f *FileNode6) AddChild6(child *FileNode6) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if !f.IsDir {
+		return fmt.Errorf("%s is not a directory", f.Name)
+	}
+	if f.Children == nil {
+		f.Children = make(map[string]*FileNode6) // maps must be initialized before use!
+	}
+	f.Children[child.Name] = child
+	child.Modified = time.Now()
+	return nil
+}
+
+func (f *FileNode6) RemoveChild6(name string) bool {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	_, ok := f.Children[name]
+	if ok {
+		delete(f.Children, name)
+		return true
+	}
+	return false
 }

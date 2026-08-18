@@ -6,6 +6,7 @@ import (
 	interfaces "mywebdav/interface"
 	"mywebdav/types"
 	"mywebdav/utils"
+	"sync"
 	"time"
 )
 
@@ -240,6 +241,50 @@ func main() {
 	// More detail written in go_concurrency_notes file.
 
 	// Q1
+	filesSlice := []string{"hello.txt", "file.txt", "animal.png", "code.js"}
+	utils.ProcessFiles(filesSlice)
+	// Q2
+	// Created AddChild6/RemoveChild6
+	// Q3
+	root6 := &types.FileNode6{Name: "root", IsDir: true}
+
+	var wg sync.WaitGroup
+	for i := 1; i <= 50; i++ {
+		wg.Add(1)
+		go func(n int) {
+			defer wg.Done()
+			child := &types.FileNode6{Name: fmt.Sprintf("file%d.txt", n)}
+			root6.AddChild6(child) // 🔥 multiple goroutines writing to the same map at once
+		}(i)
+	}
+	wg.Wait()
+	fmt.Println(root6)
+	// Q4
+	dragonPicture6 := types.FileNode6{
+		Name:     "dragon.png",
+		Size:     2048,
+		IsDir:    false,
+		Modified: time.Now(),
+	}
+	catPicture6 := types.FileNode6{
+		Name:     "cat.png",
+		Size:     2048,
+		IsDir:    false,
+		Modified: time.Now(),
+	}
+	videoFile6 := types.FileNode6{
+		Name:     "video.mp4",
+		Size:     6096,
+		IsDir:    false,
+		Modified: time.Now(),
+	}
+	textFile6 := types.FileNode6{
+		Name:     "file.txt",
+		Size:     4096,
+		IsDir:    false,
+		Modified: time.Now(),
+	}
+	fmt.Println(utils.CollectSizes([]*types.FileNode6{&dragonPicture6, &catPicture6, &videoFile6, &textFile6}))
 	//////////// END ////////////
 
 	fmt.Println("End Main!")
