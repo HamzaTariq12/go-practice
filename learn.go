@@ -3,9 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	interfaces "mywebdav/interface"
 	"mywebdav/types"
 	"mywebdav/utils"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -285,6 +287,65 @@ func main() {
 		Modified: time.Now(),
 	}
 	fmt.Println(utils.CollectSizes([]*types.FileNode6{&dragonPicture6, &catPicture6, &videoFile6, &textFile6}))
+	//////////// END ////////////
+
+	// 7: Packages & stdlib (os, io, path/filepath, net/http)
+	//////////// START ////////////
+	// Q1
+	rootPath := "C:\\Personal\\golang\\mywebdav\\storage"
+	userPath := "htariq"
+	fullPath, err7_1 := utils.SafeJoin(rootPath, userPath)
+	if err7_1 != nil {
+		fmt.Println("Failed to generate safe path")
+	}
+	fmt.Println(fullPath)
+	// userDirExists, err7_2 := utils.CheckAndCreateUserPath(rootPath, userPath)
+	// if err7_2 != nil {
+	// 	fmt.Println("Failed: ", err7_2)
+	// } else {
+	// 	fmt.Println(userDirExists)
+	// }
+	// Q2
+	textFile7 := types.FileNode6{
+		Name:     "file.txt",
+		IsDir:    false,
+		Modified: time.Now(),
+	}
+	utils.SaveNode(&textFile7, rootPath+"\\"+userPath)
+	// Q3
+	fmt.Println(utils.LoadNode(rootPath + "\\" + userPath + "\\" + "file.txt"))
+	// Q4
+	mux := http.NewServeMux()
+	mux.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello, WebDAV world!"))
+	})
+	mux.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
+		dirList, err := utils.UserListDirectory(rootPath + "\\" + userPath)
+		if err != nil {
+			http.Error(w, "Failed to list directory", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
+		// Write header
+		w.Write([]byte("Files in directory:\n"))
+		w.Write([]byte("------------------\n\n"))
+
+		for _, node := range dirList {
+			w.Write([]byte(fmt.Sprintf("📄 %s (%d bytes) - %s\n",
+				node.Name,
+				node.Size,
+				node.Modified.Format("2006-01-02 15:04:05"))),
+			)
+		}
+	})
+
+	log.Println("serving on :8080")
+	err := http.ListenAndServe(":8080", mux)
+	if err != nil {
+		log.Fatal(err) // log.Fatal prints and calls os.Exit(1)
+	}
 	//////////// END ////////////
 
 	fmt.Println("End Main!")
